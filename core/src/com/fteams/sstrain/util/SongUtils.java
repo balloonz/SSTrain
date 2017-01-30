@@ -24,9 +24,13 @@ public class SongUtils {
     public final static Integer SYNC_MODE_3 = 2;
     public final static Integer SYNC_DISABLED = 3;
 
+    public final static Integer FALL_MODE_CONST = 0;
+    public final static Integer FALL_MODE_PARAB = 1;
+
     public final static Integer GAME_MODE_NORMAL = 0;
     public final static Integer GAME_MODE_ABREPEAT = 1;
 
+    public final static String[] fallModes = {"Vertical", "Parabolic"};
     public final static String[] syncModes = {"Default", "Constant Sync", "Initial Sync", "Disabled"};
     public final static Long[] noteSpeeds = {1800L, 1680L, 1560L, 1440L, 1320L, 1200L, 1050L, 900L, 750L, 600L, 450L};
 

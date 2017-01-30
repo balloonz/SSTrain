@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.fteams.sstrain.World;
 import com.fteams.sstrain.assets.Assets;
 import com.fteams.sstrain.config.GlobalConfiguration;
@@ -31,10 +32,11 @@ public class WorldRenderer {
 
     private World world;
     private OrthographicCamera cam;
-
+    private float height_to_circle_ratio = 0.14f;
     // textures
     TextureRegion circle;
     TextureRegion circleSim;
+    TextureRegion circleHold;
     TextureRegion circleSwipeLeft;
     TextureRegion circleSwipeLeftSim;
     TextureRegion circleSwipeRight;
@@ -43,6 +45,11 @@ public class WorldRenderer {
     TextureRegion tapZoneIdle;
     TextureRegion tapZoneWarn;
     TextureRegion tapZonePressed;
+
+    TextureRegion tapZoneAll;
+    TextureRegion tapZoneCute;
+    TextureRegion tapZoneCool;
+    TextureRegion tapZonePassion;
 
     TextureRegion accBadBackground;
     TextureRegion accGoodBackground;
@@ -61,6 +68,8 @@ public class WorldRenderer {
     TextureRegion greatLateMark;
     TextureRegion greatSoonMark;
     TextureRegion perfectMark;
+
+    TextureRegion comboMark;
 
     BitmapFont font;
     BitmapFont songFont;
@@ -108,6 +117,7 @@ public class WorldRenderer {
     private void loadTextures() {
         TextureAtlas atlas = Assets.atlas;
         circle = atlas.findRegion("circle");
+        circleHold = atlas.findRegion("circle_hold");
         circleSim = atlas.findRegion("circle_sim");
         circleSwipeLeft = atlas.findRegion("circle_swipe_left");
         circleSwipeLeftSim = atlas.findRegion("circle_swipe_left_sim");
@@ -117,6 +127,11 @@ public class WorldRenderer {
         tapZoneIdle = atlas.findRegion("tap");
         tapZonePressed = atlas.findRegion("tap_pressed");
         tapZoneWarn = atlas.findRegion("tap_warn");
+        //
+        tapZoneAll = atlas.findRegion("tap_zone_all");
+        tapZoneCute = atlas.findRegion("tap_zone_cute");
+        tapZoneCool = atlas.findRegion("tap_zone_cool");
+        tapZonePassion = atlas.findRegion("tap_zone_passion");
 
         accBadBackground = atlas.findRegion("acc_bad");
         accGoodBackground = atlas.findRegion("acc_good");
@@ -134,6 +149,8 @@ public class WorldRenderer {
         greatLateMark = atlas.findRegion("great_late");
         greatSoonMark = atlas.findRegion("great_soon");
         perfectMark = atlas.findRegion("perfect");
+
+        comboMark = atlas.findRegion("combo_mark");
 
         font = Assets.font;
         songFont = Assets.songFont;
@@ -247,18 +264,37 @@ public class WorldRenderer {
     }
 
     private void drawCombo() {
-        float centerX = this.positionOffsetX + width / 2;
-        float centerY = height / 2;
+        float centerX = this.positionOffsetX + width * 4/ 5;
+        float centerY = height * 4 / 5;
         if (world.combo != 0) {
-            layout.setText(font, "" + world.combo);
-            font.draw(spriteBatch, "" + world.combo, centerX - layout.width / 2, centerY - layout.height / 2);
+            String str = "" + world.combo;
+            //layout.setText(font, str);
+            layout.setText(font, str, 0, str.length(), font.getColor(), 0, Align.center, false, null);
+            float x = centerX - layout.width / 2;
+            float y = centerY - layout.height / 2;
+            font.draw(spriteBatch, "" + world.combo, x, y);
+
+            TextureRegion region = comboMark;
+            float markHeight = height*0.05f;
+            float markWidth  = markHeight*comboMark.getRegionWidth()/comboMark.getRegionHeight();
+            spriteBatch.draw(region, x, y - layout.height*2,markWidth,markHeight);
         }
     }
 
     private void drawTapZones() {
+        // implement different trZone for different attribute in the future
+        TextureRegion trZone = tapZoneAll;
+
         float centerX = this.positionOffsetX + width / 2;
         float centerY = this.positionOffsetY + height - height * 0.2f;
-        float size = height * 0.125f;
+        float size  = height * 0.125f *1.44f;//* 1.42f;
+        float width = trZone.getRegionWidth()*size/trZone.getRegionHeight();
+        TapZone zone = world.getTapZones().get(0);
+        float x = centerX - width / 2;
+        float y = centerY + zone.getPosition().y * ppuY - size / 2;
+        // draw tap zone
+        spriteBatch.draw(trZone, x, y, width, size);
+
         for (TapZone tapZone : world.getTapZones()) {
 
             TextureRegion region = tapZoneIdle;
@@ -271,9 +307,11 @@ public class WorldRenderer {
                 tapZone.touchTime = time;
             }
 
-            final float x = centerX + tapZone.getPosition().x * ppuX - size / 2;
-            final float y = centerY + tapZone.getPosition().y * ppuY - size / 2;
-            spriteBatch.draw(region, x, y, size, size);
+            x = centerX + tapZone.getPosition().x * ppuX - size / 2;
+            y = centerY + tapZone.getPosition().y * ppuY - size / 2;
+
+            // no longer draw 5 circles on tap zone
+            //spriteBatch.draw(region, x, y, size, size);
 
             float alpha = 1f - MathUtils.clamp((time - tapZone.touchTime) * 5f, 0f, 1f);
             if (alpha > 0) {
@@ -283,13 +321,20 @@ public class WorldRenderer {
                 spriteBatch.setColor(c);
             }
         }
+
     }
 
     private void drawCircles() {
         float centerX = this.positionOffsetX + width / 2;
         float centerY = this.positionOffsetY + height - height * 0.2f;
-        float size = height * 0.1f;
-
+        float size = height * height_to_circle_ratio;
+        // calculate based on texture width and height
+        float cir_width = circle.getRegionWidth();
+        float cir_height = circle.getRegionHeight();
+        float ratio = cir_width / cir_height;
+        cir_height = height * height_to_circle_ratio;
+        cir_width = height  * height_to_circle_ratio * ratio;
+        //
         for (Circle mark : world.getCircles()) {
             if (!mark.visible)
                 continue;
@@ -319,7 +364,12 @@ public class WorldRenderer {
                 dst.y *= ppuY;
                 dst.x += centerX;
                 dst.y += centerY;
-                drawHoldBeam(org, dst, size, size);
+                if(mark.note.type==SongUtils.NOTE_TYPE_HOLD && mark.startPoint.x != mark.endPoint.x){
+                    // hold beam for parabolic fall
+                    drawHoldParabola(mark, org, dst, size);
+                }else {
+                    drawHoldBeam(org, dst, size * mark.nextNote.size, size * mark.size);
+                }
             }
 
             if (!mark.note.sync.equals(0L)) {
@@ -342,9 +392,10 @@ public class WorldRenderer {
                 }
             }
             if (mark.visible) {
-
+                float this_width = cir_width* mark.size;
+                float this_height = cir_height * mark.size;
                 spriteBatch.setColor(c.r, c.g, c.b, alpha);
-                spriteBatch.draw(selectTextureForCircle(mark.note), centerX - size / 2 + mark.position.x * ppuX, centerY - size / 2 + mark.position.y * ppuY, size, size);
+                spriteBatch.draw(selectTextureForCircle(mark.note), centerX - this_width / 2 + mark.position.x * ppuX, centerY - this_height / 2 + mark.position.y * ppuY, this_width, this_height);
 
             }
             spriteBatch.setColor(c);
@@ -382,12 +433,46 @@ public class WorldRenderer {
         PolygonRegion clamped = new PolygonRegion(holdBG, points, triangles);
         spriteBatch.draw(clamped, from.x - w * 0.5f, from.y, w * 0.5f, 0f, w, h, 1f, 1f, delta.angle() + 90);
     }
-
+    private void drawHoldParabola(Circle mark, Vector2 from0, Vector2 to0,float size0) {
+        Vector2 from = new Vector2();
+        Vector2 to = new Vector2();
+        float fromSize, toSize;
+        from = from0.cpy();
+        fromSize = mark.nextNote.size;
+        // build hold beam from trajectory of the note
+        for(int i=0;i<mark.nTraj;i++){
+            to = mark.traj[i].cpy();
+            toSize = mark.traj_size[i];
+            if(to.y > from.y) {
+                continue;
+            }
+            if(to.y < to0.y){
+                break;
+            }
+            drawHoldBeam(from, to, fromSize*size0, toSize*size0);
+            from = to.cpy();
+            fromSize = toSize;
+        }
+        if(from.y >to0.y){
+            toSize = mark.size;
+            drawHoldBeam(from, to0, fromSize*size0, toSize*size0);
+            if(!mark.holding && mark.nTraj < mark.maxTraj){
+                // add current position and size to trajectory
+                mark.traj[mark.nTraj]=to0.cpy();
+                mark.traj_size[mark.nTraj] = mark.size;
+                mark.nTraj++;
+            }
+        }
+    }
     private TextureRegion selectTextureForCircle(Note note) {
 
         if (note.sync.intValue() == SongUtils.NOTE_SYNC_ON) {
             if (note.status.equals(SongUtils.NOTE_NO_SWIPE)) {
-                return circleSim;
+                if(note.type.equals(SongUtils.NOTE_TYPE_HOLD)){
+                    return circleHold;
+                }else{
+                    return circleSim;
+                }
             } else if (note.status.equals(SongUtils.NOTE_SWIPE_LEFT)) {
                 return circleSwipeLeftSim;
             } else if (note.status.equals(SongUtils.NOTE_SWIPE_RIGHT)) {
@@ -395,7 +480,11 @@ public class WorldRenderer {
             }
         } else if (note.sync.intValue() == SongUtils.NOTE_SYNC_OFF) {
             if (note.status.equals(SongUtils.NOTE_NO_SWIPE)) {
-                return circle;
+                if(note.type.equals(SongUtils.NOTE_TYPE_HOLD)){
+                    return circleHold;
+                }else{
+                    return circle;
+                }
             } else if (note.status.equals(SongUtils.NOTE_SWIPE_LEFT)) {
                 return circleSwipeLeft;
             } else if (note.status.equals(SongUtils.NOTE_SWIPE_RIGHT)) {

@@ -29,6 +29,8 @@ public class GlobalConfiguration {
     // sync config
     public static int syncMode;
 
+    public static int fallMode;
+
     public final static int BASE_HEIGHT = 720;
 
     // not stored/remembered variables:
@@ -55,6 +57,8 @@ public class GlobalConfiguration {
         sortOrder = prefs.getInteger("sorting_order", SongUtils.SORTING_MODE_ASCENDING);
         // sync mode
         syncMode = prefs.getInteger("sync_mode", SongUtils.SYNC_MODE_1);
+        // fall mode
+        fallMode = prefs.getInteger("fall_mode", SongUtils.FALL_MODE_CONST);
 
     }
 
@@ -72,6 +76,7 @@ public class GlobalConfiguration {
         prefs.putInteger("sorting_mode", sortMode);
         prefs.putInteger("sorting_order", sortOrder);
         prefs.putInteger("sync_mode", syncMode);
+        prefs.putInteger("fall_mode", fallMode);
         prefs.flush();
     }
 }

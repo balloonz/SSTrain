@@ -1,4 +1,195 @@
+notes.png
+size: 616,440
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+circle
+  rotate: false
+  xy: 462, 0
+  size: 154,110
+  orig: 154,110
+  offset: 0, 0
+  index: -1
+circle_sim
+  rotate: false
+  xy: 462, 0
+  size: 154,110
+  orig: 154,110
+  offset: 0, 0
+  index: -1
+circle_hold
+  rotate: false
+  xy: 462, 110
+  size: 154,110
+  orig: 154,110
+  offset: 0, 0
+  index: -1
+circle_swipe_left
+  rotate: false
+  xy: 462, 220
+  size: 154,110
+  orig: 154,110
+  offset: 0, 0
+  index: -1
+circle_swipe_right
+  rotate: false
+  xy: 462, 330
+  size: 154,110
+  orig: 154,110
+  offset: 0, 0
+  index: -1
+circle_swipe_left_sim
+  rotate: false
+  xy: 462, 220
+  size: 154,110
+  orig: 154,110
+  offset: 0, 0
+  index: -1
+circle_swipe_right_sim
+  rotate: false
+  xy: 462, 330
+  size: 154,110
+  orig: 154,110
+  offset: 0, 0
+  index: -1
+  
+judge.png
+size: 324,370
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none  
+perfect
+  rotate: false
+  xy: 0,0
+  size: 324, 74
+  orig: 324, 74
+  offset: 0, 0
+  index: -1
+great_late
+  rotate: false
+  xy: 0,74
+  size: 324, 74
+  orig: 324, 74
+  offset: 0, 0
+  index: -1
+great_soon
+  rotate: false
+  xy: 0,74
+  size: 324, 74
+  orig: 324, 74
+  offset: 0, 0
+  index: -1  
+nice_late
+  rotate: false
+  xy: 0, 148
+  size: 324, 74
+  orig: 324, 74
+  offset: 0, 0
+  index: -1
+nice_soon
+  rotate: false
+  xy: 0, 148
+  size: 324, 74
+  orig: 324, 74
+  offset: 0, 0
+  index: -1
+good_late
+  rotate: false
+  xy: 0, 148
+  size: 324, 74
+  orig: 324, 74
+  offset: 0, 0
+  index: -1
+good_soon
+  rotate: false
+  xy: 0, 148
+  size: 324, 74
+  orig: 324, 74
+  offset: 0, 0
+  index: -1
+bad_late
+  rotate: false
+  xy: 0, 222
+  size: 324, 74
+  orig: 324, 74
+  offset: 0, 0
+  index: -1
+bad_soon
+  rotate: false
+  xy: 0, 222
+  size: 324, 74
+  orig: 324, 74
+  offset: 0, 0
+  index: -1
+miss
+  rotate: false
+  xy: 0, 296
+  size: 324, 74
+  orig: 324, 74
+  offset: 0, 0
+  index: -1
 
+
+ring_lower.png
+size: 1008,568
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+tap_zone_all
+  rotate: false
+  xy: 0, 426
+  size: 1008, 142
+  orig: 1008, 142
+  offset: 0, 0
+  index: -1	
+tap_zone_cute
+  rotate: false
+  xy: 0, 0
+  size: 1008, 142
+  orig: 1008, 142
+  offset: 0, 0
+  index: -1
+tap_zone_cool
+  rotate: false
+  xy: 0, 142
+  size: 1008, 142
+  orig: 1008, 142
+  offset: 0, 0
+  index: -1
+tap_zone_passion
+  rotate: false
+  xy: 0, 284
+  size: 1008, 142
+  orig: 1008, 142
+  offset: 0, 0
+  index: -1
+
+hit_circle.png
+size: 120,120
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+tap_pressed
+  rotate: false
+  xy: 0,0
+  size: 120,120
+  orig: 120,120
+  offset: 0, 0
+  index: -1
+  
+combo_text.png
+size: 140,38
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+combo_mark
+  rotate: false
+  xy: 0,0
+  size: 140,38
+  orig: 140,38
+  offset: 0, 0
+  index: -1
+ 
 textures.pack.png
 size: 512,512
 format: RGBA8888
@@ -9,27 +200,6 @@ acc_mark
   xy: 506, 208
   size: 1, 50
   orig: 1, 50
-  offset: 0, 0
-  index: -1
-circle
-  rotate: false
-  xy: 2, 2
-  size: 250, 250
-  orig: 250, 250
-  offset: 0, 0
-  index: -1
-circle_sim
-  rotate: false
-  xy: 260, 260
-  size: 250, 250
-  orig: 250, 250
-  offset: 0, 0
-  index: -1
-circle_swipe_left
-  rotate: false
-  xy: 254, 2
-  size: 250, 250
-  orig: 250, 250
   offset: 0, 0
   index: -1
 hold_background
@@ -59,27 +229,6 @@ size: 512,512
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-circle_swipe_left_sim
-  rotate: false
-  xy: 2, 254
-  size: 250, 250
-  orig: 250, 250
-  offset: 0, 0
-  index: -1
-circle_swipe_right
-  rotate: false
-  xy: 2, 2
-  size: 250, 250
-  orig: 250, 250
-  offset: 0, 0
-  index: -1
-circle_swipe_right_sim
-  rotate: false
-  xy: 254, 254
-  size: 250, 250
-  orig: 250, 250
-  offset: 0, 0
-  index: -1
 tap
   rotate: false
   xy: 254, 2
@@ -121,48 +270,6 @@ acc_perfect
   orig: 50, 50
   offset: 0, 0
   index: -1
-bad_late
-  rotate: false
-  xy: 324, 420
-  size: 65, 30
-  orig: 65, 30
-  offset: 0, 0
-  index: -1
-bad_soon
-  rotate: false
-  xy: 439, 388
-  size: 65, 30
-  orig: 65, 30
-  offset: 0, 0
-  index: -1
-good_late
-  rotate: false
-  xy: 324, 83
-  size: 93, 30
-  orig: 93, 30
-  offset: 0, 0
-  index: -1
-good_soon
-  rotate: false
-  xy: 324, 51
-  size: 93, 30
-  orig: 93, 30
-  offset: 0, 0
-  index: -1
-great_late
-  rotate: false
-  xy: 324, 388
-  size: 113, 30
-  orig: 113, 30
-  offset: 0, 0
-  index: -1
-great_soon
-  rotate: false
-  xy: 391, 420
-  size: 113, 30
-  orig: 113, 30
-  offset: 0, 0
-  index: -1
 knob
   rotate: false
   xy: 480, 482
@@ -196,41 +303,6 @@ menu_item_idle
   xy: 2, 34
   size: 320, 100
   orig: 320, 100
-  offset: 0, 0
-  index: -1
-miss
-  rotate: false
-  xy: 419, 41
-  size: 90, 19
-  orig: 90, 19
-  offset: 0, 0
-  index: -1
-nice_late
-  rotate: false
-  xy: 324, 19
-  size: 93, 30
-  orig: 93, 30
-  offset: 0, 0
-  index: -1
-nice_soon
-  rotate: false
-  xy: 2, 2
-  size: 93, 30
-  orig: 93, 30
-  offset: 0, 0
-  index: -1
-perfect
-  rotate: false
-  xy: 324, 115
-  size: 158, 19
-  orig: 158, 19
-  offset: 0, 0
-  index: -1
-tap_pressed
-  rotate: false
-  xy: 2, 150
-  size: 250, 250
-  orig: 250, 250
   offset: 0, 0
   index: -1
 tap_warn

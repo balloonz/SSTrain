@@ -64,6 +64,7 @@ public class SettingsScreen extends ChangeListener implements Screen, InputProce
 
     private CheckBox playHintSoundCheckbox;
     private CheckBox syncModeCheckbox;
+    private CheckBox fallModeCheckBox;
     private CheckBox sortingModeChooser;
     private CheckBox sortingOrderChooser;
     private CheckBox displayLineChooser;
@@ -86,6 +87,7 @@ public class SettingsScreen extends ChangeListener implements Screen, InputProce
     private Integer newSortingMode;
     private Integer newSortingOrder;
     private Integer newSyncMode;
+    private Integer newFallMode;
     private Integer newNoteSpeed;
     private Integer newOverallDifficulty;
     private Boolean newDisplayLine;
@@ -112,6 +114,7 @@ public class SettingsScreen extends ChangeListener implements Screen, InputProce
         newSortingMode = GlobalConfiguration.sortMode;
         newSortingOrder = GlobalConfiguration.sortOrder;
         newSyncMode = GlobalConfiguration.syncMode;
+        newFallMode = GlobalConfiguration.fallMode;
         newDisplayLine = GlobalConfiguration.displayLine;
 
         ButtonGroup<TextButton> buttonGroup = new ButtonGroup<>();
@@ -233,6 +236,11 @@ public class SettingsScreen extends ChangeListener implements Screen, InputProce
         syncModeCheckbox.getImageCell().width(0);
         syncModeCheckbox.addListener(this);
 
+        fallModeCheckBox = new CheckBox("Fall Mode: " + SongUtils.fallModes[newFallMode], Assets.menuSkin);
+        fallModeCheckBox.getLabel().setFontScale(fontScale);
+        fallModeCheckBox.getImageCell().width(0);
+        fallModeCheckBox.addListener(this);
+
 
         final Table offsetTable = new Table();
         // global offset
@@ -266,6 +274,8 @@ public class SettingsScreen extends ChangeListener implements Screen, InputProce
 
         // sync mode setting
         offsetTable.add(syncModeCheckbox).height(inputOffsetLabel.getHeight() * fontScale).padTop(stage.getHeight() * 0.01f).padBottom(stage.getHeight() * 0.01f).left().colspan(3).row();
+
+        offsetTable.add(fallModeCheckBox).height(inputOffsetLabel.getHeight() * fontScale).padTop(stage.getHeight() * 0.01f).padBottom(stage.getHeight() * 0.01f).left().colspan(3).row();
 
         offsetTable.add().expand().fill().row();
         offsetTable.setVisible(false);
@@ -354,6 +364,7 @@ public class SettingsScreen extends ChangeListener implements Screen, InputProce
                 GlobalConfiguration.sortMode = newSortingMode;
                 GlobalConfiguration.sortOrder = newSortingOrder;
                 GlobalConfiguration.syncMode = newSyncMode;
+                GlobalConfiguration.fallMode = newFallMode;
                 GlobalConfiguration.displayLine = newDisplayLine;
                 GlobalConfiguration.storeConfiguration();
                 ((Game) Gdx.app.getApplicationListener()).setScreen(new MainMenuScreen());
@@ -444,8 +455,12 @@ public class SettingsScreen extends ChangeListener implements Screen, InputProce
             sortingOrderChooser.setText("Sorting Order: " + sortingOrders[newSortingOrder]);
         }
         if (actor == syncModeCheckbox) {
-            newSyncMode = (newSyncMode + 1) % 4;
+            newSyncMode = (newSyncMode + 1) % SongUtils.syncModes.length;
             syncModeCheckbox.setText("Sync Mode: " + SongUtils.syncModes[newSyncMode]);
+        }
+        if (actor == fallModeCheckBox) {
+            newFallMode = (newFallMode + 1) % SongUtils.fallModes.length;
+            fallModeCheckBox.setText("Fall Mode: " + SongUtils.fallModes[newFallMode]);
         }
     }
 

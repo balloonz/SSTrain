@@ -71,7 +71,7 @@ public class World {
             }
 
             x = (copy.endPos - 3) * radius * 4;
-            Circle mark = new Circle(x, 0, copy, noteSpeed, delay);
+            Circle mark = new Circle(radius, copy, noteSpeed, delay);
             circles.add(mark);
         }
 //        System.out.println("Loaded: " + circles.size + " notes");

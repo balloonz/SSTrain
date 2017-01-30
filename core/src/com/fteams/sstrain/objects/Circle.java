@@ -15,11 +15,21 @@ public class Circle implements Comparable<Circle> {
 
     public Vector2 origin = new Vector2();
     public Vector2 position = new Vector2();
+    public Vector2 startPoint = new Vector2();
+    public Vector2 endPoint = new Vector2();
+
     Vector2 velocity = new Vector2();
+    Vector2 acceleration = new Vector2();
 
     public boolean hold;
     public Long destination;
-    Double speed;
+
+    public boolean parabolic=true;          // parabolic fall or not
+    public boolean hasResistance = true;    // has air resistance or not
+
+    Double time_of_flight;
+    Double resistance;                          // air resistance
+
     public Circle nextNote;
     public Circle previousNote;
     public Circle nextSyncNote;
@@ -29,7 +39,8 @@ public class Circle implements Comparable<Circle> {
     float startWaitTime;
     float endWaitTime;
 
-    float size;
+    public float size;
+    float velocitySize;
 
     public float hitTime;
     float previousTime;
@@ -46,28 +57,52 @@ public class Circle implements Comparable<Circle> {
     public Accuracy accuracy;
     public boolean processed;
 
+    // trajectory of this circle, for constructing hold beam in parabolic mode
+    public int nTraj = 0;
+    public int maxTraj = 0;
+    public Vector2[] traj;
+    public float[] traj_size;
+
     // holds consist of 2 notes out of which the first one must have type 2
     // the second one will either be a type 2 or a type 1 with some effect
     // notes with type 1 can be linked to other notes IF the effect != 0 and the groupID is set.
 
-    public Circle(float x, float y, Note note, Double noteSpeed, float delay) {
+    public Circle(float radius, Note note, Double noteSpeed, float delay) {
+
+        parabolic = GlobalConfiguration.fallMode == SongUtils.FALL_MODE_PARAB;
 
         float timing = (float) (delay + note.timing * 1f + GlobalConfiguration.offset * 1f / 1000f);
-
-        this.origin.x = x;
-        this.origin.y = y;
-        this.position.x = x;
-        this.position.y = y;
+        if(parabolic){
+            this.startPoint.x = (note.startPos - 3) * radius * 4 * 0.9f;
+            this.startPoint.y = 0;
+            this.size = 0f;
+            if(note.type==SongUtils.NOTE_TYPE_HOLD){
+                maxTraj = 100;//(int) Math.ceil(noteSpeed);
+                traj = new Vector2[maxTraj];
+                traj_size = new float[maxTraj];
+            }
+        }else{
+            // vertical fall: start point equals endPos
+            this.startPoint.x = (note.endPos - 3) * radius * 4;
+            this.startPoint.y = 0;
+            this.size = 1f;
+        }
+        this.endPoint.x = (note.endPos - 3) * radius * 4;
+        this.endPoint.y = -249;
+        this.origin.x = endPoint.x;
+        this.origin.y = endPoint.y;
+        this.position.x = startPoint.x;
+        this.position.y = startPoint.y;
         this.note = note;
         this.hold = (note.type & SongUtils.NOTE_TYPE_HOLD) != 0;
         // position goes 1-5
         this.destination = note.endPos;
-        this.speed = noteSpeed;
-        this.spawnTime = (float) (timing - speed);
+        this.time_of_flight = noteSpeed;
+        this.spawnTime = (float) (timing - time_of_flight);
         this.startWaitTime = (float) (timing - (hold || !note.status.equals(SongUtils.NOTE_NO_SWIPE) ? 2f : 1f) * SongUtils.overallDiffBad[GlobalConfiguration.overallDifficulty] / 1000f);
         this.endWaitTime = (float) (timing + (hold || !note.status.equals(SongUtils.NOTE_NO_SWIPE) ? 2f : 1f) * SongUtils.overallDiffBad[GlobalConfiguration.overallDifficulty] / 1000f);
         this.despawnTime = timing * 1.0f;
-        this.size = 1f;
+
         this.previousSystemTime = 0L;
 
         hitTime = -9f;
@@ -101,10 +136,32 @@ public class Circle implements Comparable<Circle> {
     }
 
     private void initializeVelocity() {
-        // unless the arc movement is implemented,
-        // the notes will simply fall from the top towards the tap zones
-        velocity.x = 0;
-        velocity.y = (float) (-249 / speed);
+        float x0 = startPoint.x;
+        float y0 = startPoint.y;
+        float x1 = endPoint.x;
+        float y1 = endPoint.y;
+        if(parabolic && hasResistance) {
+            // fall under gravity with air resistance
+            // tune velocity.y, time_of_flight in the future to make its speed more similar to CGSS
+            resistance = 1.0;
+            double exp = 1.0 - Math.exp(-resistance * time_of_flight);
+            velocity.x = (float) ((x1-x0)*resistance/exp);
+            velocity.y = 3f;
+            acceleration.x = 0f;
+            acceleration.y = (float) ((y1-y0-velocity.y*exp/resistance)*resistance*resistance/(exp  - resistance * time_of_flight));
+            velocitySize = (float) (resistance/exp);
+        }else if(parabolic){
+            // fall under gravity without air resistance
+            velocity.x = (float) ((x1-x0)/time_of_flight);
+            velocity.y = 3f;
+            acceleration.x = 0f;
+            acceleration.y = (float) ((y1-y0-velocity.y*time_of_flight)*2/time_of_flight/time_of_flight);
+            velocitySize = (float)(1.0/time_of_flight);
+        }else{
+            // vertical fall
+            velocity.x = 0;
+            velocity.y = (float) ((y1-y0) / time_of_flight);
+        }
     }
 
     public void update(float time) {
@@ -144,12 +201,25 @@ public class Circle implements Comparable<Circle> {
         }
 
         if (visible) {
-            // TODO: implement parabolic movement of the notes towards the player and use the origin spot instead of spawning from the same lane (more SS-like)
             float scl = time - spawnTime;
             if (holding) {
-                position.set(origin.cpy().x, origin.cpy().y - 249);
-            } else
-                position.set(origin.cpy().add(velocity.cpy().scl(scl)));
+                position.set(endPoint.x,endPoint.y);
+            } else if(parabolic && hasResistance){
+                // fall under gravity with air resistance bv
+                double c0 = 1 - Math.exp(-resistance*scl);
+                double c1 = c0/ resistance;
+                double c2 = (c0 - resistance * scl) /resistance/resistance;
+                position.x = (float)(startPoint.x + velocity.x * c1 + acceleration.x *c2);
+                position.y = (float)(startPoint.y + velocity.y * c1 + acceleration.y *c2);
+                size = (float) (velocitySize * c1);
+            } else if(parabolic){
+                // r = r_0 + vt + at^2/2
+                position.set(startPoint.cpy().add(velocity.cpy().scl(scl)).add(acceleration.cpy().scl(scl*scl/2)));
+                size = (float) (velocitySize * scl);
+            }else {
+                // r = r_0 + vt
+                position.set(startPoint.cpy().add(velocity.cpy().scl(scl)));
+            }
         }
         if (startWaitTime <= time && endWaitTime > time && !waiting && accuracy == null) {
             waiting = true;

@@ -15,6 +15,7 @@ import com.fteams.sstrain.entities.Beatmap;
 import com.fteams.sstrain.entities.BeatmapGroup;
 import com.fteams.sstrain.entities.Metadata;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,18 +79,32 @@ public class Assets {
     // so if the same file comes again, it will be skipped
     public static void reloadBeatmaps() {
         if (Gdx.files.absolute(Gdx.files.getExternalStoragePath() + BEATMAP_HOME).exists()) {
+            loadBeatmapsInFolder(Gdx.files.getExternalStoragePath() , BEATMAP_HOME);
+            /*
             for (String fileName : Gdx.files.absolute(Gdx.files.getExternalStoragePath() + BEATMAP_HOME).file().list()) {
                 String fullPath = Gdx.files.getExternalStoragePath() + BEATMAP_HOME + fileName;
-                // if for any reason the user placed .osu/.osz files in the datafiles, we process them
+                // skip folders and non-json files
                 if (Gdx.files.absolute(fullPath).isDirectory() || (!fileName.endsWith(".json")))
                     continue;
-
-                externalManager.load(BEATMAP_HOME + fileName, List.class);
+                    externalManager.load(BEATMAP_HOME + fileName, List.class);
             }
+            */
         } else {
             (Gdx.files.absolute(Gdx.files.getExternalStoragePath() + "beatmaps")).mkdirs();
             (Gdx.files.absolute(Gdx.files.getExternalStoragePath() + BEATMAP_HOME)).mkdirs();
             (Gdx.files.absolute(Gdx.files.getExternalStoragePath() + SOUNDFILES_HOME)).mkdirs();
+        }
+    }
+    public static void loadBeatmapsInFolder(String prefix, String path){
+        if (Gdx.files.absolute(prefix+path).exists()) {
+            for (String fileName : Gdx.files.absolute(prefix + path).file().list()) {
+                String newPath = path + fileName;
+                if (Gdx.files.absolute(prefix + newPath).isDirectory()) {
+                    loadBeatmapsInFolder(prefix, newPath+"/");
+                }else if(fileName.endsWith(".json")){
+                    externalManager.load(newPath, List.class);
+                }
+            }
         }
     }
 
