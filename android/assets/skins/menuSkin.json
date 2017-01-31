@@ -15,7 +15,8 @@
   "black": { "a": 1, "b": 0, "g": 0, "r": 0 }
 },
   "com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle": {
-    "item1": {"up": "menu_item_idle", "down": "menu_item_down", "font": jp-font-small, "pressedOffsetY": -4}
+    "item1": {"up": "menu_item_idle", "down": "menu_item_down", "font": jp-font-small, "pressedOffsetY": -4},
+	"song_filter": {"up": "song_selection_menu_background", "down": "song_selection_menu_background", "font": song-list, "fontColor": black, "pressedOffsetY": -4}
   },
   "com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle": {
     "default": { "up": "selection_menu_background" , "down": "selection_menu_selected", "font": jp-font-small, "pressedOffsetY": -4 }
@@ -46,6 +47,8 @@
     "default-horizontal": {background: "knob_after", knobBefore:"knob_before"}
   },
   "com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle":{
-    "default":{checkboxOn: "selection_menu_background", checkboxOff: "selection_menu_background", font: jp-font-small}
-  }
+    "default":{checkboxOn: "selection_menu_background", checkboxOff: "selection_menu_background", font: jp-font-small},
+	"song_select":{checkboxOn: "selection_menu_background", checkboxOff: "selection_menu_background", "font": song-list, "fontColor": black}
+  },
+  
 }

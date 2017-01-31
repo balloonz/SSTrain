@@ -12,13 +12,16 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.fteams.sstrain.assets.Assets;
 import com.fteams.sstrain.config.GlobalConfiguration;
@@ -26,12 +29,15 @@ import com.fteams.sstrain.controller.Crossfader;
 import com.fteams.sstrain.controller.SongLoader;
 import com.fteams.sstrain.entities.Beatmap;
 import com.fteams.sstrain.entities.BeatmapGroup;
+import com.fteams.sstrain.util.SongUtils;
+
+import jdk.nashorn.internal.objects.Global;
 
 @SuppressWarnings("unchecked")
 public class SongSelectionScreen implements Screen, InputProcessor {
 
     private Stage stage = new Stage(new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-    private List<BeatmapGroup> songList = new List<>(Assets.menuSkin, "diff_list");
+    private List<BeatmapGroup> songList = null;
     private ScrollPane songListPane = new ScrollPane(null, Assets.menuSkin);
     private List<Beatmap> diffList = new List<>(Assets.menuSkin, "diff_list");
     private ScrollPane diffListPane = new ScrollPane(null, Assets.menuSkin);
@@ -40,6 +46,18 @@ public class SongSelectionScreen implements Screen, InputProcessor {
     private TextButton backButton = new TextButton("Back", Assets.menuSkin, "item1");
     private Image backgroundImage = new Image(Assets.mainMenuBackgroundTexture);
     private Crossfader previewCrossfader = new Crossfader();
+    // sorting choices
+    private CheckBox sortingModeChooser;
+    private CheckBox sortingOrderChooser;
+    private String[] sortingOrders = {"Ascending", "Descending"};
+    private Integer newSortingMode;
+    private Integer newSortingOrder;
+    // attribute filter
+    private TextButton attrChooser;
+    private String[] attrChoices = {"Any", "Cute", "Cool", "Passion", "All"};
+    private Integer attrFilter = 0;
+
+
 
     private void stopPreviewSong() {
         previewCrossfader.dispose();
@@ -61,6 +79,44 @@ public class SongSelectionScreen implements Screen, InputProcessor {
         previewCrossfader.enqueue(previewMusic);
     }
 
+    private Array<BeatmapGroup> filterSongList(Array<BeatmapGroup> songGroup, Integer attribute){
+
+        if(attribute.equals(0)) {
+            return songGroup;
+        }
+        Array<BeatmapGroup> filtered = new Array<BeatmapGroup>();
+        Long attr = Long.valueOf(attribute);
+        for(BeatmapGroup song:songGroup){
+            if(song.metadata.attribute == attr){
+                filtered.add(song);
+            }
+        }
+        return filtered;
+    }
+    private void updateSongList(){
+        Assets.songGroup.sort();
+        Array<BeatmapGroup> songs = filterSongList(Assets.songGroup,attrFilter);
+        if(songList == null || songs.size == 0){
+            // need to create new List object when songs.size becomes 0 after filtering
+            songList = new List<>(Assets.menuSkin, "diff_list");
+            songList.setItems(songs);
+            songListPane.setWidget(songList);
+            songListPane.setWidth(stage.getWidth());
+            if (Assets.selectedGroup != null) {
+                songList.setSelected(Assets.selectedGroup);
+                diffList.setItems(Assets.selectedGroup.beatmaps);
+            } else {
+                if (songList.getItems().size != 0)
+                {
+                    Assets.selectedGroup = songList.getItems().get(0);
+                    diffList.setItems(Assets.selectedGroup.beatmaps);
+                }
+            }
+        }else{
+            songList.setItems(songs);
+        }
+    }
+
     @Override
     public void show() {
         float scaleFactor = stage.getHeight() / GlobalConfiguration.BASE_HEIGHT;
@@ -69,20 +125,7 @@ public class SongSelectionScreen implements Screen, InputProcessor {
         backgroundImage.setSize(stage.getWidth(), stage.getHeight());
         stage.addActor(backgroundImage);
 
-        Assets.songGroup.sort();
-        songList.setItems(Assets.songGroup);
-
-        if (Assets.selectedGroup != null) {
-            songList.setSelected(Assets.selectedGroup);
-            diffList.setItems(Assets.selectedGroup.beatmaps);
-        } else {
-            if (songList.getItems().size != 0)
-            {
-                Assets.selectedGroup = songList.getItems().get(0);
-                diffList.setItems(Assets.selectedGroup.beatmaps);
-            }
-
-        }
+        updateSongList();
 
         songList.addListener(new ChangeListener() {
             @Override
@@ -121,14 +164,92 @@ public class SongSelectionScreen implements Screen, InputProcessor {
         nextButton.getLabel().setFontScale(scaleFactor);
         backButton.getLabel().setFontScale(scaleFactor);
 
-        songListPane.setWidget(songList);
-        songListPane.setWidth(stage.getWidth());
-
         diffListPane.setWidget(diffList);
         diffListPane.setWidth(stage.getWidth());
 
-        table.add(songListPane).colspan(3).size(stage.getWidth() * 0.87f, stage.getHeight() * 0.49f).padBottom(stage.getHeight() * 0.01f).row();
-        table.add(diffListPane).colspan(3).size(stage.getWidth() * 0.87f, stage.getHeight() * 0.23f).padBottom(stage.getHeight() * 0.01f).padTop(stage.getHeight() * 0.01f).row();
+        // Sorting Choices
+        newSortingMode = GlobalConfiguration.sortMode;
+        newSortingOrder = GlobalConfiguration.sortOrder;
+        sortingModeChooser = new CheckBox(SongUtils.sortModes[GlobalConfiguration.sortMode], Assets.menuSkin, "song_select");
+        sortingModeChooser.getLabel().setFontScale(scaleFactor*0.75f);
+        sortingModeChooser.getImageCell().width(0);
+        sortingModeChooser.addListener((new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                newSortingMode = (newSortingMode + 1) % SongUtils.sortModes.length;
+                sortingModeChooser.setText(SongUtils.sortModes[newSortingMode]);
+                GlobalConfiguration.sortMode = newSortingMode;
+                updateSongList();
+            }
+        }));
+        sortingOrderChooser = new CheckBox(sortingOrders[GlobalConfiguration.sortOrder], Assets.menuSkin, "song_select");
+        sortingOrderChooser.getLabel().setFontScale(scaleFactor*0.75f);
+        sortingOrderChooser.getImageCell().width(0);
+        sortingOrderChooser.setWidth(stage.getWidth() * 0.87f/5);
+        sortingOrderChooser.addListener((new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                newSortingOrder = (newSortingOrder + 1) % sortingOrders.length;
+                sortingOrderChooser.setText(sortingOrders[newSortingOrder]);
+                GlobalConfiguration.sortOrder = newSortingOrder;
+                updateSongList();
+
+            }
+        }));
+        // Attribute Filter
+        attrChooser = new TextButton(attrChoices[attrFilter], Assets.menuSkin, "song_filter");
+        attrChooser.getLabel().setFontScale(scaleFactor*0.75f);
+        attrChooser.addListener((new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                attrFilter = (attrFilter + 1) % attrChoices.length;
+                attrChooser.setText(attrChoices[attrFilter]);
+                updateSongList();
+            }
+        }));
+
+        // Create table containing sorting and attribute choices
+        Table sortTable = new Table(Assets.menuSkin);
+        Label nameLabel, openLabel, closeLabel;
+        //
+        nameLabel = new Label("Sort Key",Assets.menuSkin,"results_title");
+        nameLabel.setFontScale(scaleFactor*0.8f);
+        openLabel = new Label(" : [  ",Assets.menuSkin,"results_title");
+        openLabel.setFontScale(scaleFactor*0.8f);
+        closeLabel = new Label(" ] ",Assets.menuSkin,"results_title");
+        closeLabel.setFontScale(scaleFactor*0.8f);
+        sortTable.add(nameLabel).left();
+        sortTable.add(openLabel);
+        sortTable.add(sortingModeChooser).size(stage.getWidth() * 0.87f / 5, stage.getHeight() * 0.05f);
+        sortTable.add(closeLabel).row();
+        //
+        nameLabel = new Label("Sort Order",Assets.menuSkin,"results_title");
+        nameLabel.setFontScale(scaleFactor*0.8f);
+        openLabel = new Label(" : [  ",Assets.menuSkin,"results_title");
+        openLabel.setFontScale(scaleFactor*0.8f);
+        closeLabel = new Label(" ] ",Assets.menuSkin,"results_title");
+        closeLabel.setFontScale(scaleFactor*0.8f);
+        sortTable.add(nameLabel).left();
+        sortTable.add(openLabel);
+        sortTable.add(sortingOrderChooser).size(stage.getWidth() * 0.87f / 5, stage.getHeight() * 0.05f);
+        sortTable.add(closeLabel).row();
+        //
+        nameLabel = new Label("Attribute",Assets.menuSkin,"results_title");
+        nameLabel.setFontScale(scaleFactor*0.8f);
+        openLabel = new Label(" : [  ",Assets.menuSkin,"results_title");
+        openLabel.setFontScale(scaleFactor*0.8f);
+        closeLabel = new Label(" ] ",Assets.menuSkin,"results_title");
+        closeLabel.setFontScale(scaleFactor*0.8f);
+        sortTable.add(nameLabel).left();
+        sortTable.add(openLabel);
+        sortTable.add(attrChooser).size(stage.getWidth() * 0.87f / 5, stage.getHeight() * 0.05f);
+        sortTable.add(closeLabel).row();
+        sortTable.top();
+        //
+        table.add(songListPane).colspan(2).size(stage.getWidth() * 0.87f, stage.getHeight() * 0.49f).padBottom(stage.getHeight() * 0.01f).row();
+        table.add(diffListPane).colspan(1).size(stage.getWidth() * 0.87f/2, stage.getHeight() * 0.23f).padBottom(stage.getHeight() * 0.01f).padTop(stage.getHeight() * 0.01f);
+        table.add(sortTable).colspan(1).size(stage.getWidth() * 0.87f/2, stage.getHeight() * 0.23f).padBottom(stage.getHeight() * 0.01f).padTop(stage.getHeight() * 0.01f);
+        table.row();
         table.setWidth(stage.getWidth());
         table.setHeight(stage.getHeight());
 
@@ -149,11 +270,12 @@ public class SongSelectionScreen implements Screen, InputProcessor {
                 }
                 stopPreviewSong();
                 Assets.selectedBeatmap = diffList.getSelected();
-                 ((Game) Gdx.app.getApplicationListener()).setScreen(new LiveOptionsScreen());
+                ((Game) Gdx.app.getApplicationListener()).setScreen(new LiveOptionsScreen());
             }
         }));
-        table.add(backButton).size(stage.getWidth() * 0.87f / 2, stage.getHeight() * 0.12f);
-        table.add(nextButton).size(stage.getWidth() * 0.87f / 2, stage.getHeight() * 0.12f);
+        table.add(backButton).colspan(1).size(stage.getWidth() * 0.87f / 2, stage.getHeight() * 0.12f);
+        table.add(nextButton).colspan(1).size(stage.getWidth() * 0.87f / 2, stage.getHeight() * 0.12f);
+
         stage.addActor(table);
 
         InputMultiplexer impx = new InputMultiplexer();

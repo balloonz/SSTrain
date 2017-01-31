@@ -4,7 +4,7 @@ import com.fteams.sstrain.util.SongUtils;
 
 public class Metadata extends BaseMetadata{
     public String difficultyName;
-    public Long difficulty;
+    public Integer difficulty;
 
     public int compareTo(Metadata metadata) {
         if (songName.equals(metadata.songName))

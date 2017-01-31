@@ -17,6 +17,14 @@ public class Beatmap implements Comparable<Beatmap>{
 
     public String toString()
     {
-        return (metadata.difficultyName == null ? "" + metadata.difficulty + "*" : ""+metadata.difficultyName+"");
+        String tag = "";
+        if(metadata.difficultyName == null){
+            tag = "" + metadata.difficulty + "*";
+        }else{
+            //tag = String.format("%-15s [ Lv %-3d ]", metadata.difficultyName, metadata.difficulty);
+            tag = String.format("%s   [ Lv %-3d ]", metadata.difficultyName, metadata.difficulty);
+        }
+        return tag;
     }
+
 }

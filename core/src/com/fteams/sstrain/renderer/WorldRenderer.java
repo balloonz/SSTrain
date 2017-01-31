@@ -328,12 +328,9 @@ public class WorldRenderer {
         float centerX = this.positionOffsetX + width / 2;
         float centerY = this.positionOffsetY + height - height * 0.2f;
         float size = height * height_to_circle_ratio;
-        // calculate based on texture width and height
-        float cir_width = circle.getRegionWidth();
-        float cir_height = circle.getRegionHeight();
-        float ratio = cir_width / cir_height;
-        cir_height = height * height_to_circle_ratio;
-        cir_width = height  * height_to_circle_ratio * ratio;
+        // calculate width,height based on texture width and height
+        float cir_height = height * height_to_circle_ratio;
+        float cir_width  = height * height_to_circle_ratio * circle.getRegionWidth()/circle.getRegionHeight();
         //
         for (Circle mark : world.getCircles()) {
             if (!mark.visible)
@@ -434,8 +431,8 @@ public class WorldRenderer {
         spriteBatch.draw(clamped, from.x - w * 0.5f, from.y, w * 0.5f, 0f, w, h, 1f, 1f, delta.angle() + 90);
     }
     private void drawHoldParabola(Circle mark, Vector2 from0, Vector2 to0,float size0) {
-        Vector2 from = new Vector2();
-        Vector2 to = new Vector2();
+        Vector2 from;
+        Vector2 to;
         float fromSize, toSize;
         from = from0.cpy();
         fromSize = mark.nextNote.size;

@@ -216,9 +216,15 @@ selection_menu_background
   orig: 1, 50
   offset: 0, 0
   index: -1
+  
+selection_menu_selected.png
+size: 1,50
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
 selection_menu_selected
   rotate: false
-  xy: 506, 156
+  xy: 0,0
   size: 1, 50
   orig: 1, 50
   offset: 0, 0

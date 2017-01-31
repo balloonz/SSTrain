@@ -71,7 +71,7 @@ public class MainMenuScreen implements Screen, InputProcessor {
         table.add(title).padBottom(stage.getHeight() * 0.1f).row();
 
         Label versionLabel = new Label("VERSION: " + GlobalConfiguration.appVersionName, Assets.menuSkin, "version_label");
-        versionLabel.setFontScale(fontScale / 2f);
+        versionLabel.setFontScale(fontScale*0.7f);
         versionLabel.setX(stage.getWidth() * 0.075f);
         versionLabel.setY(stage.getHeight() * 0.9f);
 
