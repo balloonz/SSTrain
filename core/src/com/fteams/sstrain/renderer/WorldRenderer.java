@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.fteams.sstrain.World;
 import com.fteams.sstrain.assets.Assets;
 import com.fteams.sstrain.config.GlobalConfiguration;
@@ -24,6 +25,7 @@ import com.fteams.sstrain.objects.Circle;
 import com.fteams.sstrain.objects.TapZone;
 import com.fteams.sstrain.util.Accuracy;
 import com.fteams.sstrain.util.SongUtils;
+
 
 public class WorldRenderer {
 
@@ -331,8 +333,11 @@ public class WorldRenderer {
         // calculate width,height based on texture width and height
         float cir_height = height * height_to_circle_ratio;
         float cir_width  = height * height_to_circle_ratio * circle.getRegionWidth()/circle.getRegionHeight();
-        //
-        for (Circle mark : world.getCircles()) {
+
+        Array<Circle> circles = world.getCircles();
+        // draw in reverse order
+        for (int i=circles.size-1;i>=0;i--) {
+            Circle mark = circles.get(i);
             if (!mark.visible)
                 continue;
 
@@ -361,7 +366,7 @@ public class WorldRenderer {
                 dst.y *= ppuY;
                 dst.x += centerX;
                 dst.y += centerY;
-                if(mark.note.type==SongUtils.NOTE_TYPE_HOLD && mark.startPoint.x != mark.endPoint.x){
+                if(mark.parabolic && mark.note.type==SongUtils.NOTE_TYPE_HOLD && mark.note.status==0){
                     // hold beam for parabolic fall
                     drawHoldParabola(mark, org, dst, size);
                 }else {

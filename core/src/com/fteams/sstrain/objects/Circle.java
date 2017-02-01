@@ -76,8 +76,8 @@ public class Circle implements Comparable<Circle> {
             this.startPoint.x = (note.startPos - 3) * radius * 4 * 0.9f;
             this.startPoint.y = 0;
             this.size = 0f;
-            if(note.type==SongUtils.NOTE_TYPE_HOLD){
-                maxTraj = 100;//(int) Math.ceil(noteSpeed);
+            if(note.type==SongUtils.NOTE_TYPE_HOLD && note.status==0){
+                maxTraj = 100; // not sure how many is enough
                 traj = new Vector2[maxTraj];
                 traj_size = new float[maxTraj];
             }

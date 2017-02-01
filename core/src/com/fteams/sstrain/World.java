@@ -70,7 +70,6 @@ public class World {
 
             }
 
-            x = (copy.endPos - 3) * radius * 4;
             Circle mark = new Circle(radius, copy, noteSpeed, delay);
             circles.add(mark);
         }
